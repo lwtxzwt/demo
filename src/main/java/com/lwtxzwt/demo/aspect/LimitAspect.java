@@ -44,6 +44,7 @@ public class LimitAspect {
         String key = limit.key();
         long time = System.currentTimeMillis() / 1000;
         if (limitDatetime.get(key) == null || !limitDatetime.get(key).equals(time)) {
+            // TODO 这里两步应该使用RedisLua 或者考虑加锁实现原子性操作
             limitDatetime.put(key, time);
             limitCount.put(key, new AtomicInteger(1));
         } else {
@@ -51,7 +52,6 @@ public class LimitAspect {
             if (count > max) {
                 throw new RuntimeException("blocked!");
             }
-            limitCount.put(key, new AtomicInteger(count));
         }
         return joinPoint.proceed();
     }
